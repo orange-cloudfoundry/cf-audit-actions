@@ -13,9 +13,11 @@ builds:
     env:
       - CGO_ENABLED=0
 archives:
-  - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+  - id: zip-archive
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
     format: zip
-  - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+  - id: binary-archive
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
     format: binary
 checksum:
   name_template: 'checksums.txt'
