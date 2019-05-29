@@ -21,7 +21,12 @@ else
     echo "Os not supported by install script"
     exit 1
 fi
-VERSION=$(curl -s https://api.github.com/repos/${OWNER}/${REPO_NAME}/releases/latest | grep tag_name | head -n 1 | cut -d '"' -f 4)
+
+if [[ "x$YINT_VERSION" == "x" ]]; then
+    VERSION=$(curl -s https://api.github.com/repos/${OWNER}/${REPO_NAME}/releases/latest | grep tag_name | head -n 1 | cut -d '"' -f 4)
+else
+    VERSION=$YINT_VERSION
+fi
 ARCHNUM=`getconf LONG_BIT`
 ARCH=""
 CPUINFO=`uname -m`
@@ -61,6 +66,6 @@ chmod +x "$FILEOUTPUT"
 if [[ "$OS" == "windows" ]]; then
     mv "$FILEOUTPUT" "${NAME}"
 else
-    mv "$FILEOUTPUT" "${NAME}"
+    mv "$FILEOUTPUT" "/usr/local/bin/${NAME}"
 fi
-echo "${NAME} has been installed. and can be found in $(pwd)/${NAME}"
+echo "${NAME} has been installed."
