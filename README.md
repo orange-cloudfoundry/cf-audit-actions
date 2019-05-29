@@ -32,3 +32,24 @@ Available commands:
   ssh      Check if ssh is enabled in spaces and deactivate it if it reach the time limit
   ssh-app  Check if ssh is enabled in apps and deactivate it if it reach the time limit
 ```
+
+## Concourse pipelines
+
+Pipeline are provided in [/ci](/ci) folder:
+
+- ssh audit and action on space:
+
+```bash
+fly set-pipeline \
+    --pipeline ssh-space-audit-actions \
+    --config ci/ssh/pipeline.yml \
+    --load-vars-from ci/ssh/vars.yml
+```
+
+- ssh audit and action on app:
+```bash
+fly set-pipeline \
+    --pipeline ssh-app-audit-actions \
+    --config ci/ssh-app/pipeline.yml \
+    --load-vars-from ci/ssh-app/vars.yml
+```
