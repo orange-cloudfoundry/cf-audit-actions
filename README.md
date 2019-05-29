@@ -3,7 +3,13 @@
 Audit cloud foundry objects and do action when found a potential vulnerability
 For now only checking and disable ssh on app or space after a time limit has been made.
 
-# Usage
+## Installation
+
+```bash
+$ bash -c "$(curl -fsSL https://raw.github.com/orange-cloudfoundry/cf-audit-actions/master/bin/install.sh)"
+```
+
+## Usage
 
 ```
 Usage:
