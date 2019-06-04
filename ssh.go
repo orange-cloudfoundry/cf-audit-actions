@@ -9,6 +9,7 @@ import (
 	"github.com/thoas/go-funk"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -91,6 +92,7 @@ func (c *ValidateSSHSpace) Execute(_ []string) error {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Printf("\nPlease confirm apply by typing 'yes': ")
 		confirm, _ := reader.ReadString('\n')
+		confirm = strings.TrimSpace(confirm)
 		if confirm != "yes" {
 			fmt.Println("Not apply !")
 			return nil
