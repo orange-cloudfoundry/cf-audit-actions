@@ -120,6 +120,7 @@ func (c *ValidateSSHSpace) Execute(_ []string) error {
 			fmt.Printf("\t- %s\n", err.Error())
 		}
 	}
+	fmt.Println("Modifications has been applied.")
 	return nil
 }
 

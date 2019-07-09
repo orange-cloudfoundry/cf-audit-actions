@@ -2,11 +2,15 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/cloudfoundry-community/go-cfclient"
 	"github.com/orange-cloudfoundry/cf-audit-actions/messages"
 	"github.com/orcaman/concurrent-map"
 	"github.com/thoas/go-funk"
+	"io/ioutil"
+	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -87,7 +91,7 @@ func (c *ValidateSSHApp) Execute(_ []string) error {
 	}
 	for k := range deactivateMap.Items() {
 		RunParallel(k, func(meta interface{}) error {
-			_, err := client.UpdateApp(meta.(string), cfclient.AppUpdateResource{
+			_, err := UpdateApp(client, meta.(string), AppUpdateSSH{
 				EnableSSH: false,
 			})
 			if err != nil {
@@ -103,6 +107,7 @@ func (c *ValidateSSHApp) Execute(_ []string) error {
 			fmt.Printf("\t- %s\n", err.Error())
 		}
 	}
+	fmt.Println("Modifications has been applied.")
 	return nil
 }
 
@@ -160,4 +165,37 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+type AppUpdateSSH struct {
+	EnableSSH bool `json:"enable_ssh"`
+}
+
+func UpdateApp(c *cfclient.Client, guid string, aur AppUpdateSSH) (cfclient.UpdateResponse, error) {
+	var updateResponse cfclient.UpdateResponse
+
+	buf := bytes.NewBuffer(nil)
+	err := json.NewEncoder(buf).Encode(aur)
+	if err != nil {
+		return cfclient.UpdateResponse{}, err
+	}
+	req := c.NewRequestWithBody("PUT", fmt.Sprintf("/v2/apps/%s", guid), buf)
+	resp, err := c.DoRequest(req)
+	if err != nil {
+		return cfclient.UpdateResponse{}, err
+	}
+	if resp.StatusCode != http.StatusCreated {
+		return cfclient.UpdateResponse{}, fmt.Errorf("CF API returned with status code %d", resp.StatusCode)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return cfclient.UpdateResponse{}, err
+	}
+	err = json.Unmarshal(body, &updateResponse)
+	if err != nil {
+		return cfclient.UpdateResponse{}, err
+	}
+	return updateResponse, nil
 }
