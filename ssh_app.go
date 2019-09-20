@@ -138,15 +138,15 @@ func findSshAppDeactivate(meta interface{}) error {
 		return nil
 	}
 	event := events[0]
-	at, _ := time.Parse(time.RFC3339, events[0].CreatedAt)
-	at = at.In(time.Local).Add(sshSpaceMeta.limit)
+	originAt, _ := time.Parse(time.RFC3339, events[0].CreatedAt)
+	at := originAt.In(time.Local).Add(sshSpaceMeta.limit)
 	if !time.Now().After(at) {
 		return nil
 	}
 	deactivateMap.Set(app.Guid, SSHAppApplyResult{
 		message: messages.C.Sprintf("App '%s' -> Last connexion at %s by %s with email %s, %s",
 			messages.C.Cyan(app.Name),
-			messages.C.Red(at.Format(time.RFC850)),
+			messages.C.Red(originAt.Format(time.RFC850)),
 			messages.C.Green(event.ActorUsername),
 			messages.C.Green(event.ActorName),
 			messages.C.BgRed("ssh will be deactivate"),
