@@ -1,6 +1,6 @@
 # cf-audit-actions
 
-Audit cloud foundry objects and do action when found a potential vulnerability
+Audit cloud foundry objects and do action when found a potential vulnerability or do not match condition
 For now only checking and disable ssh on app or space after a time limit has been made.
 
 ## Installation
@@ -13,7 +13,7 @@ $ bash -c "$(curl -fsSL https://raw.github.com/orange-cloudfoundry/cf-audit-acti
 
 ```
 Usage:
-  cf-audit-actions [OPTIONS] <ssh | ssh-app>
+  cf-audit-actions [OPTIONS] <ssh | ssh-app | org-limiter>
 
 Application Options:
   -a, --api=                 cf api endpoint

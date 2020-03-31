@@ -1,0 +1,38 @@
+resources:
+  - name: 24h
+    type: time
+    source:
+      location: Europe/Paris
+      interval: 24h
+      start: 4:00 AM
+      stop: 4:00 PM
+jobs:
+  - name: org-limiter-audit-action
+    plan:
+      - get: 24h
+        trigger: true
+      - task: audit-actions
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: orangeopensource/concourse
+              tag: tools
+          run:
+            path: cf-audit-actions
+            args:
+              - "--api"
+              - "((cf-api))"
+              - "-u"
+              - "((cf-username))"
+              - "-p"
+              - "((cf-password))"
+              - "--parallel"
+              - "((parallel))"
+              - "org-limiter"
+              - "--time-limit="
+              - "((time-limit))"
+              - "--org"
+              - "((org))"
+              - "--force"

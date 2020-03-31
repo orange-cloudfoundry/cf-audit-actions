@@ -1,0 +1,3 @@
+parallel: 20
+time-limit: 168h # 7 days
+org: <set your org name>

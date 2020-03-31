@@ -18,7 +18,7 @@ import (
 )
 
 type ValidateSSHApp struct {
-	SshLimit     SshLimit `short:"l" long:"ssh-time-limit" description:"Define when an enabled ssh should be set as disabled" default:"24h"`
+	SshLimit     Duration `short:"l" long:"ssh-time-limit" description:"Define when an enabled ssh should be set as disabled" default:"24h"`
 	Force        bool     `short:"f" long:"force" description:"Will apply directly deactivation of ssh without confirmation"`
 	IgnoreSpaces []string `alias:"is" long:"ignore-space" description:"Ignore space ids or by name in format of <org name>/<space name or *>"`
 }
