@@ -13,7 +13,7 @@ $ bash -c "$(curl -fsSL https://raw.github.com/orange-cloudfoundry/cf-audit-acti
 
 ```
 Usage:
-  cf-audit-actions [OPTIONS] <ssh | ssh-app | org-limiter>
+  cf-audit-actions [OPTIONS] <org-limiter | ssh | ssh-app>
 
 Application Options:
   -a, --api=                 cf api endpoint
@@ -29,8 +29,9 @@ Help Options:
   -h, --help                 Show this help message
 
 Available commands:
-  ssh      Check if ssh is enabled in spaces and deactivate it if it reach the time limit
-  ssh-app  Check if ssh is enabled in apps and deactivate it if it reach the time limit
+  org-limiter  Delete all apps which has been created after a period of time in an org
+  ssh          Check if ssh is enabled in spaces and deactivate it if it reach the time limit
+  ssh-app      Check if ssh is enabled in apps and deactivate it if it reach the time limit
 ```
 
 ## Concourse pipelines
