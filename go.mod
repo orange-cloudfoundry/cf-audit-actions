@@ -1,6 +1,6 @@
 module github.com/orange-cloudfoundry/cf-audit-actions
 
-go 1.12
+go 1.15
 
 require (
 	github.com/Masterminds/semver v1.5.0 // indirect
