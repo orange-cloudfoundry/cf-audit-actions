@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"github.com/orange-cloudfoundry/cf-audit-actions/messages"
+	"github.com/prometheus/common/version"
 	"os"
 )
 
@@ -18,24 +19,17 @@ type Options struct {
 	Version           func() `short:"v" long:"version" description:"Show version"`
 }
 
-var (
-	version = "dev"
-	commit  = "none"
-	date    = "unknown"
-)
 var options Options
 var parser = flags.NewParser(&options, flags.HelpFlag|flags.PassDoubleDash|flags.IgnoreUnknown)
 
 func Parse(args []string) error {
-
-	askVersion := false
 	options.Version = func() {
-		askVersion = true
-		fmt.Printf("cf-audit-actions %v, commit %v, built at %v", version, commit, date)
+		fmt.Printf("%s\n", version.Print("cf-audit-actions"))
+		os.Exit(0)
 	}
 	_, err := parser.ParseArgs(args[1:])
 	if err != nil {
-		if errFlag, ok := err.(*flags.Error); ok && askVersion && errFlag.Type == flags.ErrCommandRequired {
+		if errFlag, ok := err.(*flags.Error); ok && errFlag.Type == flags.ErrCommandRequired {
 			return nil
 		}
 		if errFlag, ok := err.(*flags.Error); ok && errFlag.Type == flags.ErrHelp {

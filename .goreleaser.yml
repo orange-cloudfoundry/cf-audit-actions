@@ -1,31 +1,49 @@
-# This is an example goreleaser.yaml file with some sane defaults.
-# Make sure to check the documentation at http://goreleaser.com
-before:
-  hooks:
-    - go mod download
+project_name: cf-audit-actions
+
 builds:
-  - goos:
-      - linux
-      - darwin
-      - windows
-    goarch:
-      - amd64
+  -
+    &template
+    id: binary
+    binary: cf-audit-actions
     env:
       - CGO_ENABLED=0
+    ldflags:
+      - -s
+      - -w
+      - -X github.com/prometheus/common/version.Version={{.Version}}
+      - -X github.com/prometheus/common/version.Revision={{.FullCommit}}
+      - -X github.com/prometheus/common/version.Branch={{.Branch}}
+      - -X github.com/prometheus/common/version.BuildUser={{.Env.USER}}
+      - -X github.com/prometheus/common/version.BuildDate={{.Date}}
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+
 archives:
-  - id: zip-archive
-    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-    format: zip
-  - id: binary-archive
-    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-    format: binary
+  - id: archives
+    builds:
+      - binary
+    format: "tar.gz"
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    wrap_in_directory: true
+    files:
+      - LICENSE*
+      - README*
+      - CHANGELOG*
+      - docs/*
+      - assets/*
+      - static/*
+      - templates/*
+
 checksum:
-  name_template: 'checksums.txt'
-snapshot:
-  name_template: "{{ .Tag }}-next"
-changelog:
-  sort: asc
-  filters:
-    exclude:
-      - '^docs:'
-      - '^test:'
+  name_template: checksums.txt
+  algorithm: sha256
+
+release:
+  github:
+    owner: orange-cloudfoundry
+    name: cf-audit-actions
+  prerelease: auto
+  name_template: '{{.Tag}}'
