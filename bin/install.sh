@@ -30,6 +30,8 @@ fi
 ARCHNUM=`getconf LONG_BIT`
 ARCH=""
 CPUINFO=`uname -m`
+VERSION_NUM=${VERSION##v}
+
 if [[ "$ARCHNUM" == "32" ]]; then
     ARCH="386"
 else
@@ -38,15 +40,15 @@ fi
 if [[ "$CPUINFO" == "arm"* ]]; then
     ARCH="arm"
 fi
-FILENAME="${NAME}_${OS}_${ARCH}"
+FILENAME="${NAME}_${VERSION_NUM}_${OS}_${ARCH}"
 if [[ "$OS" == "windows" ]]; then
     FILENAME="${FILENAME}.exe"
 fi
-LINK="https://github.com/${OWNER}/${NAME}/releases/download/${VERSION}/${FILENAME}"
+LINK="https://github.com/${OWNER}/${NAME}/releases/download/${VERSION}/${FILENAME}.tar.gz"
 if [[ "$OS" == "windows" ]]; then
-    FILEOUTPUT="${FILENAME}"
+    FILEOUTPUT="${FILENAME}.tar.gz"
 else
-    FILEOUTPUT="${TMPDIR}/${FILENAME}"
+    FILEOUTPUT="${TMPDIR}/${FILENAME}.tar.gz"
 fi
 RESPONSE=200
 if hash curl 2>/dev/null; then
@@ -62,10 +64,15 @@ if [ "$RESPONSE" != "200" ] && [ "$RESPONSE" != "0" ]; then
     exit 1
 fi
 
-chmod +x "$FILEOUTPUT"
+tar xzf ${FILEOUTPUT} --strip 1 ${FILENAME}/${NAME}
+
+chmod +x "${NAME}"
 if [[ "$OS" == "windows" ]]; then
-    mv "$FILEOUTPUT" "${NAME}"
+    mv "cf-audit-actions" "${NAME}"
 else
-    mv "$FILEOUTPUT" "/usr/local/bin/${NAME}"
+    mv "cf-audit-actions" "/usr/local/bin/${NAME}"
 fi
+
+
+
 echo "${NAME} has been installed."
