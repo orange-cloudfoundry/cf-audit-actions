@@ -3,12 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"net/url"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/cloudfoundry-community/go-cfclient"
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
 )
 
 type OrgLimit struct {
@@ -21,23 +20,28 @@ var orgLimit OrgLimit
 
 func (c *OrgLimit) Execute(_ []string) error {
 	initParallel()
-	client, err := retrieveClient()
+	sess, err := getSession()
 	if err != nil {
 		return err
 	}
 
-	org, err := client.GetOrgByName(c.Org)
-	if err != nil {
+	orgs, _, err := sess.V3().GetOrganizations(ccv3.Query{
+		Key:    ccv3.NameFilter,
+		Values: []string{c.Org},
+	})
+	if err != nil || len(orgs) == 0 {
 		return err
 	}
 
-	apps, err := client.ListAppsByQuery(url.Values{
-		"q": []string{"organization_guid:" + org.Guid},
+	apps, err := sess.ExtGetApplications(large, ccv3.Query{
+		Key:    ccv3.OrganizationGUIDFilter,
+		Values: []string{orgs[0].GUID},
 	})
 	if err != nil {
 		return err
 	}
-	toDelete := make([]cfclient.App, 0)
+
+	toDelete := make([]Application, 0)
 	for _, app := range apps {
 		createdAt, _ := time.Parse(time.RFC3339, app.CreatedAt)
 		if createdAt.Add(time.Duration(c.TimeLimit)).Before(time.Now()) {
@@ -50,7 +54,7 @@ func (c *OrgLimit) Execute(_ []string) error {
 	}
 	fmt.Printf("\nWill delete app on org %s: \n", c.Org)
 	for _, app := range toDelete {
-		fmt.Printf("\t- %s ( cf curl /v2/apps/%s )\n", app.Name, app.Guid)
+		fmt.Printf("\t- %s ( cf curl /v2/apps/%s )\n", app.Name, app.GUID)
 	}
 
 	if !c.Force {
@@ -65,7 +69,7 @@ func (c *OrgLimit) Execute(_ []string) error {
 	}
 
 	for _, app := range toDelete {
-		RunParallel(app.Guid, func(meta interface{}) error {
+		RunParallel(app.GUID, func(meta interface{}) error {
 			err := cleanupAppRoutes(meta.(string))
 			if err != nil {
 				return err
@@ -74,7 +78,8 @@ func (c *OrgLimit) Execute(_ []string) error {
 			if err != nil {
 				return err
 			}
-			return client.DeleteApp(meta.(string))
+			_, _, err = sess.V3().DeleteApplication(meta.(string))
+			return err
 		})
 	}
 
@@ -86,11 +91,11 @@ func (c *OrgLimit) Execute(_ []string) error {
 		}
 	}
 
-	err = c.cleanupOrphanRoutes(org.Guid)
+	err = c.cleanupOrphanRoutes(orgs[0].GUID)
 	if err != nil {
 		fmt.Println("Error while cleanup orphan's routes:" + err.Error())
 	}
-	err = c.cleanupOrphanServices(org.Guid)
+	err = c.cleanupOrphanServices(orgs[0].GUID)
 	if err != nil {
 		fmt.Println("Error while cleanup orphan's service instance:" + err.Error())
 	}
@@ -100,19 +105,20 @@ func (c *OrgLimit) Execute(_ []string) error {
 }
 
 func cleanupAppRoutes(appGUID string) error {
-	client, err := retrieveClient()
+	sess, err := getSession()
 	if err != nil {
 		return err
 	}
-	routeMappings, err := client.ListRouteMappingsByQuery(url.Values{
-		"q": []string{"app_guid:" + appGUID},
+	routeMappings, _, _, err := sess.V3().GetRouteBindings(large, ccv3.Query{
+		Key:    ccv3.AppGUIDFilter,
+		Values: []string{appGUID},
 	})
 	if err != nil {
 		return err
 	}
 
 	for _, routeMapping := range routeMappings {
-		err := client.DeleteRouteMapping(routeMapping.Guid)
+		_, _, err := sess.V3().DeleteRouteBinding(routeMapping.GUID)
 		if err != nil {
 			return err
 		}
@@ -122,49 +128,53 @@ func cleanupAppRoutes(appGUID string) error {
 }
 
 func cleanupAppServices(appGUID string) error {
-	client, err := retrieveClient()
+	sess, err := getSession()
 	if err != nil {
 		return err
 	}
-	serviceBindings, err := client.ListServiceBindingsByQuery(url.Values{
-		"q": []string{"app_guid:" + appGUID},
+	serviceBindings, _, err := sess.V3().GetServiceCredentialBindings(large, ccv3.Query{
+		Key:    ccv3.AppGUIDFilter,
+		Values: []string{appGUID},
 	})
 	if err != nil {
 		return err
 	}
 
 	for _, serviceBinding := range serviceBindings {
-		err := client.DeleteServiceBinding(serviceBinding.Guid)
+		_, _, err := sess.V3().DeleteServiceCredentialBinding(serviceBinding.GUID)
 		if err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
 func (c *OrgLimit) cleanupOrphanRoutes(orgGUID string) error {
 	initParallel()
-	client, err := retrieveClient()
+
+	sess, err := getSession()
 	if err != nil {
 		return err
 	}
-	routes, err := client.ListRoutesByQuery(url.Values{
-		"q": []string{"organization_guid:" + orgGUID},
+	routes, err := sess.ExtGetRoutes(large, ccv3.Query{
+		Key:    ccv3.OrganizationGUIDFilter,
+		Values: []string{orgGUID},
 	})
 	if err != nil {
 		return err
 	}
+
 	for _, route := range routes {
 		createdAt, _ := time.Parse(time.RFC3339, route.CreatedAt)
 		if createdAt.Add(time.Duration(c.TimeLimit)).Before(time.Now()) {
-			RunParallel(route.Guid, func(meta interface{}) error {
-				result, err := client.ListAppsByRoute((meta.(string)))
+			RunParallel(route.GUID, func(meta interface{}) error {
+				dests, _, err := sess.V3().GetRouteDestinations((meta.(string)))
 				if err != nil {
 					return err
 				}
-				if len(result) == 0 {
-					return client.DeleteRoute(meta.(string))
+				if len(dests) == 0 {
+					_, _, err := sess.V3().DeleteRoute(meta.(string))
+					return err
 				}
 				return nil
 			})
@@ -184,28 +194,32 @@ func (c *OrgLimit) cleanupOrphanRoutes(orgGUID string) error {
 
 func (c *OrgLimit) cleanupOrphanServices(orgGUID string) error {
 	initParallel()
-	client, err := retrieveClient()
+	sess, err := getSession()
 	if err != nil {
 		return err
 	}
-	serviceInstances, err := client.ListServiceInstancesByQuery(url.Values{
-		"q": []string{"organization_guid:" + orgGUID},
+	serviceInstances, err := sess.ExtGetServiceInstances(large, ccv3.Query{
+		Key:    ccv3.OrganizationGUIDFilter,
+		Values: []string{orgGUID},
 	})
 	if err != nil {
 		return err
 	}
+
 	for _, serviceInstance := range serviceInstances {
 		createdAt, _ := time.Parse(time.RFC3339, serviceInstance.CreatedAt)
 		if createdAt.Add(time.Duration(c.TimeLimit)).Before(time.Now()) {
-			RunParallel(serviceInstance.Guid, func(meta interface{}) error {
-				result, err := client.ListServiceBindingsByQuery(url.Values{
-					"q": []string{"service_instance_guid:" + (meta.(string))},
+			RunParallel(serviceInstance.GUID, func(meta interface{}) error {
+				result, _, err := sess.V3().GetServiceCredentialBindings(large, ccv3.Query{
+					Key:    ccv3.ServiceInstanceGUIDFilter,
+					Values: []string{meta.(string)},
 				})
 				if err != nil {
 					return err
 				}
 				if len(result) == 0 {
-					return client.DeleteServiceInstance(meta.(string), true, true)
+					_, _, err = sess.V3().DeleteServiceInstance(meta.(string))
+					return err
 				}
 				return nil
 			})
