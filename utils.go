@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/orange-cloudfoundry/cf-audit-actions/messages"
 	"strings"
+
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
+	"github.com/orange-cloudfoundry/cf-audit-actions/messages"
 )
 
 func findSpaces(idOrPairs []string) ([]string, error) {
@@ -26,28 +28,45 @@ func findSpace(idOrPair string) ([]string, error) {
 	if len(pairSplit) == 1 {
 		return []string{idOrPair}, nil
 	}
-	client, err := retrieveClient()
+	sess, err := getSession()
 	if err != nil {
 		return []string{idOrPair}, err
 	}
-	org, err := client.GetOrgByName(pairSplit[0])
+	orgs, _, err := sess.V3().GetOrganizations(ccv3.Query{
+		Key: ccv3.NameFilter,
+		Values: []string{pairSplit[0]},
+	})
 	if err != nil {
 		return []string{idOrPair}, err
 	}
+	if len(orgs) != 1 {
+		return []string{idOrPair}, fmt.Errorf("multiple match for org name %s", pairSplit[0])
+	}
+
 	if pairSplit[1] != "*" {
-		space, err := client.GetSpaceByName(pairSplit[1], org.Guid)
+		spaces, _, _, err := sess.V3().GetSpaces(
+			ccv3.Query{ Key: ccv3.OrganizationGUIDFilter, Values: []string{orgs[0].GUID} },
+			ccv3.Query{ Key: ccv3.NameFilter, Values: []string{pairSplit[1]} },
+		)
 		if err != nil {
 			return []string{idOrPair}, err
 		}
-		return []string{space.Guid}, nil
+		if len(spaces) != 1 {
+			return []string{idOrPair}, fmt.Errorf("multiple match for space name %s in org %s", pairSplit[1], orgs[0].GUID)
+		}
+		return []string{spaces[0].GUID}, nil
 	}
-	spaces, err := client.OrgSpaces(org.Guid)
+	spaces, _, _, err := sess.V3().GetSpaces(large, ccv3.Query{
+		Key: ccv3.OrganizationGUIDFilter,
+		Values: []string{orgs[0].GUID},
+	})
 	if err != nil {
 		return []string{idOrPair}, err
 	}
+
 	ids := make([]string, len(spaces))
 	for i, space := range spaces {
-		ids[i] = space.Guid
+		ids[i] = space.GUID
 	}
 	return ids, nil
 }

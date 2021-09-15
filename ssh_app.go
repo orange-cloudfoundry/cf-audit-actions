@@ -2,19 +2,16 @@ package main
 
 import (
 	"bufio"
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"github.com/cloudfoundry-community/go-cfclient"
-	"github.com/orange-cloudfoundry/cf-audit-actions/messages"
-	"github.com/orcaman/concurrent-map"
-	"github.com/thoas/go-funk"
-	"io/ioutil"
-	"net/http"
-	"net/url"
 	"os"
 	"strings"
 	"time"
+
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
+	"code.cloudfoundry.org/cli/resources"
+	"github.com/orange-cloudfoundry/cf-audit-actions/messages"
+	"github.com/orcaman/concurrent-map"
+	"github.com/thoas/go-funk"
 )
 
 type ValidateSSHApp struct {
@@ -26,8 +23,8 @@ type ValidateSSHApp struct {
 var validateSSHApp ValidateSSHApp
 
 type SSHAppMeta struct {
-	app           cfclient.App
-	client        *cfclient.Client
+	app           resources.Application
+	session       *Session
 	deactivateMap cmap.ConcurrentMap
 	limit         time.Duration
 }
@@ -38,7 +35,7 @@ type SSHAppApplyResult struct {
 
 func (c *ValidateSSHApp) Execute(_ []string) error {
 	initParallel()
-	client, err := retrieveClient()
+	sess, err := getSession()
 	if err != nil {
 		return err
 	}
@@ -47,21 +44,25 @@ func (c *ValidateSSHApp) Execute(_ []string) error {
 	if err != nil {
 		return err
 	}
-	apps, err := client.ListApps()
+	apps, _, err := sess.V3().GetApplications()
 	if err != nil {
 		return err
 	}
 	deactivateMap := cmap.New()
 	for _, app := range apps {
-		if !app.EnableSSH {
+		enabled, _, err := sess.V3().GetAppFeature(app.GUID, "ssh")
+		if err != nil {
+			return err
+		}
+		if !enabled.Enabled {
 			continue
 		}
-		if funk.ContainsString(ignoredSpaces, app.SpaceGuid) {
+		if funk.ContainsString(ignoredSpaces, app.SpaceGUID) {
 			continue
 		}
 		sshAppMeta := SSHAppMeta{
 			app:           app,
-			client:        client,
+			session:        sess,
 			deactivateMap: deactivateMap,
 			limit:         time.Duration(c.SshLimit),
 		}
@@ -91,9 +92,7 @@ func (c *ValidateSSHApp) Execute(_ []string) error {
 	}
 	for k := range deactivateMap.Items() {
 		RunParallel(k, func(meta interface{}) error {
-			_, err := UpdateApp(client, meta.(string), AppUpdateSSH{
-				EnableSSH: false,
-			})
+			_, err := sess.V3().UpdateAppFeature(meta.(string), false, "ssh")
 			if err != nil {
 				return err
 			}
@@ -111,24 +110,29 @@ func (c *ValidateSSHApp) Execute(_ []string) error {
 	return nil
 }
 
+
 func findSshAppDeactivate(meta interface{}) error {
 	sshSpaceMeta := meta.(SSHAppMeta)
 	app := sshSpaceMeta.app
-	client := sshSpaceMeta.client
+	sess := sshSpaceMeta.session
 	deactivateMap := sshSpaceMeta.deactivateMap
-	events, err := client.ListEventsByQuery(url.Values{
-		"q": []string{
-			fmt.Sprintf("actee:%s", app.Guid),
-			fmt.Sprintf("type:audit.app.ssh-authorized"),
+
+	events, _, err := sess.V3().GetEvents(
+		orderByTimestampDesc,
+		ccv3.Query{
+			Key: "types",
+			Values: []string{ "audit.app.ssh-authorized" },
 		},
-		"order-by":        []string{"timestamp"},
-		"order-direction": []string{"desc"},
-	})
+		ccv3.Query{
+			Key: ccv3.TargetGUIDFilter,
+			Values: []string{ app.GUID },
+		},
+	)
 	if err != nil {
 		return err
 	}
 	if len(events) == 0 {
-		deactivateMap.Set(app.Guid, SSHAppApplyResult{
+		deactivateMap.Set(app.GUID, SSHAppApplyResult{
 			message: messages.C.Sprintf(
 				"App '%s' will %s because there is no connexion in ssh from a long time",
 				messages.C.Cyan(app.Name),
@@ -138,16 +142,15 @@ func findSshAppDeactivate(meta interface{}) error {
 		return nil
 	}
 	event := events[0]
-	originAt, _ := time.Parse(time.RFC3339, events[0].CreatedAt)
+	originAt := event.CreatedAt
 	at := originAt.In(time.Local).Add(sshSpaceMeta.limit)
 	if !time.Now().After(at) {
 		return nil
 	}
-	deactivateMap.Set(app.Guid, SSHAppApplyResult{
-		message: messages.C.Sprintf("App '%s' -> Last connexion at %s by %s with email %s, %s",
+	deactivateMap.Set(app.GUID, SSHAppApplyResult{
+		message: messages.C.Sprintf("App '%s' -> Last connexion at %s by %s, %s",
 			messages.C.Cyan(app.Name),
 			messages.C.Red(originAt.Format(time.RFC850)),
-			messages.C.Green(event.ActorUsername),
 			messages.C.Green(event.ActorName),
 			messages.C.BgRed("ssh will be deactivate"),
 		),
@@ -169,33 +172,4 @@ func init() {
 
 type AppUpdateSSH struct {
 	EnableSSH bool `json:"enable_ssh"`
-}
-
-func UpdateApp(c *cfclient.Client, guid string, aur AppUpdateSSH) (cfclient.UpdateResponse, error) {
-	var updateResponse cfclient.UpdateResponse
-
-	buf := bytes.NewBuffer(nil)
-	err := json.NewEncoder(buf).Encode(aur)
-	if err != nil {
-		return cfclient.UpdateResponse{}, err
-	}
-	req := c.NewRequestWithBody("PUT", fmt.Sprintf("/v2/apps/%s", guid), buf)
-	resp, err := c.DoRequest(req)
-	if err != nil {
-		return cfclient.UpdateResponse{}, err
-	}
-	if resp.StatusCode != http.StatusCreated {
-		return cfclient.UpdateResponse{}, fmt.Errorf("CF API returned with status code %d", resp.StatusCode)
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
-	if err != nil {
-		return cfclient.UpdateResponse{}, err
-	}
-	err = json.Unmarshal(body, &updateResponse)
-	if err != nil {
-		return cfclient.UpdateResponse{}, err
-	}
-	return updateResponse, nil
 }

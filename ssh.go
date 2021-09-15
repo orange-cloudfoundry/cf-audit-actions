@@ -3,14 +3,15 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/cloudfoundry-community/go-cfclient"
-	"github.com/orange-cloudfoundry/cf-audit-actions/messages"
-	"github.com/orcaman/concurrent-map"
-	"github.com/thoas/go-funk"
-	"net/url"
 	"os"
 	"strings"
 	"time"
+
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
+	"code.cloudfoundry.org/cli/resources"
+	"github.com/orange-cloudfoundry/cf-audit-actions/messages"
+	"github.com/orcaman/concurrent-map"
+	"github.com/thoas/go-funk"
 )
 
 type ValidateSSHSpace struct {
@@ -22,20 +23,20 @@ type ValidateSSHSpace struct {
 var validateSSHSpace ValidateSSHSpace
 
 type SSHSpaceMeta struct {
-	space         cfclient.Space
-	client        *cfclient.Client
+	space         resources.Space
+	session       *Session
 	deactivateMap cmap.ConcurrentMap
 	limit         time.Duration
 }
 
 type SSHSpaceApplyResult struct {
-	space   cfclient.Space
+	space   resources.Space
 	message string
 }
 
 func (c *ValidateSSHSpace) Execute(_ []string) error {
 	initParallel()
-	client, err := retrieveClient()
+	sess, err := getSession()
 	if err != nil {
 		return err
 	}
@@ -45,21 +46,25 @@ func (c *ValidateSSHSpace) Execute(_ []string) error {
 		return err
 	}
 
-	spaces, err := client.ListSpaces()
+	spaces, _, _, err := sess.V3().GetSpaces(large)
 	if err != nil {
 		return err
 	}
 	deactivateMap := cmap.New()
 	for _, space := range spaces {
-		if !space.AllowSSH {
+		enabled, _, err := sess.V3().GetSpaceFeature(space.GUID, "ssh")
+		if err != nil {
+			return err
+		}
+		if !enabled {
 			continue
 		}
-		if funk.ContainsString(ignoredSpaces, space.Guid) {
+		if funk.ContainsString(ignoredSpaces, space.GUID) {
 			continue
 		}
 		sshSpaceMeta := SSHSpaceMeta{
 			space:         space,
-			client:        client,
+			session:       sess,
 			deactivateMap: deactivateMap,
 			limit:         time.Duration(c.SshLimit),
 		}
@@ -87,14 +92,11 @@ func (c *ValidateSSHSpace) Execute(_ []string) error {
 			return nil
 		}
 	}
-	for k, v := range deactivateMap.Items() {
+	for _, v := range deactivateMap.Items() {
 		result := v.(SSHSpaceApplyResult)
 		RunParallel(result.space, func(meta interface{}) error {
-			space := meta.(cfclient.Space)
-			_, err := client.UpdateSpace(k, cfclient.SpaceRequest{
-				Name:     space.Name,
-				AllowSSH: false,
-			})
+			space := meta.(resources.Space)
+			_, err := sess.V3().UpdateSpaceFeature(space.GUID, false, "ssh")
 			if err != nil {
 				return err
 			}
@@ -116,21 +118,27 @@ func (c *ValidateSSHSpace) Execute(_ []string) error {
 func findSshSpaceDeactivate(meta interface{}) error {
 	sshSpaceMeta := meta.(SSHSpaceMeta)
 	space := sshSpaceMeta.space
-	client := sshSpaceMeta.client
+	sess := sshSpaceMeta.session
 	deactivateMap := sshSpaceMeta.deactivateMap
-	events, err := client.ListEventsByQuery(url.Values{
-		"q": []string{
-			fmt.Sprintf("space_guid:%s", space.Guid),
-			fmt.Sprintf("type:audit.app.ssh-authorized"),
+
+
+	events, _, err := sess.V3().GetEvents(
+		orderByTimestampDesc,
+		ccv3.Query{
+			Key: "types",
+			Values: []string{ "audit.app.ssh-authorized" },
 		},
-		"order-by":        []string{"timestamp"},
-		"order-direction": []string{"desc"},
-	})
+		ccv3.Query{
+			Key: ccv3.SpaceGUIDFilter,
+			Values: []string{ space.GUID },
+		},
+	)
+
 	if err != nil {
 		return err
 	}
 	if len(events) == 0 {
-		deactivateMap.Set(space.Guid, SSHSpaceApplyResult{
+		deactivateMap.Set(space.GUID, SSHSpaceApplyResult{
 			space: space,
 			message: messages.C.Sprintf(
 				"Space '%s' will %s because there is no connexion in ssh from a long time",
@@ -141,17 +149,16 @@ func findSshSpaceDeactivate(meta interface{}) error {
 		return nil
 	}
 	event := events[0]
-	originAt, _ := time.Parse(time.RFC3339, events[0].CreatedAt)
+	originAt := events[0].CreatedAt
 	at := originAt.In(time.Local).Add(sshSpaceMeta.limit)
 	if !time.Now().After(at) {
 		return nil
 	}
-	deactivateMap.Set(space.Guid, SSHSpaceApplyResult{
+	deactivateMap.Set(space.GUID, SSHSpaceApplyResult{
 		space: space,
-		message: messages.C.Sprintf("Space '%s' -> Last connexion at %s by %s with email %s, %s",
+		message: messages.C.Sprintf("Space '%s' -> Last connexion at %s by %s, %s",
 			messages.C.Cyan(space.Name),
 			messages.C.Red(originAt.Format(time.RFC850)),
-			messages.C.Green(event.ActorUsername),
 			messages.C.Green(event.ActorName),
 			messages.C.BgRed("ssh will be deactivate"),
 		),
