@@ -13,7 +13,7 @@ require (
 	github.com/mattn/go-isatty v0.0.14
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/orcaman/concurrent-map v0.0.0-20210501183033-44dafcb38ecc
-	github.com/prometheus/common v0.32.0
+	github.com/prometheus/common v0.32.1
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/thoas/go-funk v0.9.1
