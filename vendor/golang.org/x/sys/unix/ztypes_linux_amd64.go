@@ -658,10 +658,6 @@ const (
 	PIDFD_NONBLOCK = 0x800
 )
 
-const (
-	PIDFD_NONBLOCK = 0x800
-)
-
 type SysvIpcPerm struct {
 	Key  int32
 	Uid  uint32
