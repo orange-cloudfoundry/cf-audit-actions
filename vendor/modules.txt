@@ -128,7 +128,7 @@ github.com/tedsuo/rata
 # github.com/thoas/go-funk v0.9.1
 ## explicit
 github.com/thoas/go-funk
-# golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f
+# golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 golang.org/x/crypto/ssh/terminal
 # golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 ## explicit
