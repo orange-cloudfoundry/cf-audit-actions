@@ -1,5 +1,4 @@
-# code.cloudfoundry.org/bytefmt v0.0.0-20210608160410-67692ebc98de
-## explicit
+# code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5
 code.cloudfoundry.org/bytefmt
 # code.cloudfoundry.org/cfnetworking-cli-api v0.0.0-20190103195135-4b04f26287a6
 code.cloudfoundry.org/cfnetworking-cli-api/cfnetworking
@@ -55,18 +54,16 @@ github.com/blang/semver
 # github.com/bmatcuk/doublestar v1.3.4
 github.com/bmatcuk/doublestar
 # github.com/bmizerany/pat v0.0.0-20210406213842-e4b6760bdd6f
-## explicit
 github.com/bmizerany/pat
 # github.com/cespare/xxhash/v2 v2.1.2
 ## explicit
 github.com/cespare/xxhash/v2
-# github.com/charlievieth/fs v0.0.1
+# github.com/charlievieth/fs v0.0.2
 github.com/charlievieth/fs
-# github.com/cloudfoundry-community/go-cf-clients-helper/v2 v2.0.0
+# github.com/cloudfoundry-community/go-cf-clients-helper/v2 v2.0.1
 ## explicit
 github.com/cloudfoundry-community/go-cf-clients-helper/v2
 # github.com/cloudfoundry/bosh-cli v6.4.1+incompatible
-## explicit
 github.com/cloudfoundry/bosh-cli/director/template
 # github.com/cloudfoundry/bosh-utils v0.0.274
 ## explicit
@@ -74,7 +71,6 @@ github.com/cloudfoundry/bosh-utils/errors
 github.com/cloudfoundry/bosh-utils/logger
 github.com/cloudfoundry/bosh-utils/system
 # github.com/cppforlife/go-patch v0.2.0
-## explicit
 github.com/cppforlife/go-patch/patch
 # github.com/golang/protobuf v1.5.2
 github.com/golang/protobuf/proto
@@ -95,7 +91,6 @@ github.com/mattn/go-colorable
 ## explicit
 github.com/mattn/go-isatty
 # github.com/mattn/go-runewidth v0.0.13
-## explicit
 github.com/mattn/go-runewidth
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
@@ -121,14 +116,13 @@ github.com/prometheus/procfs/internal/util
 # github.com/rivo/uniseg v0.2.0
 github.com/rivo/uniseg
 # github.com/sirupsen/logrus v1.8.1
-## explicit
 github.com/sirupsen/logrus
 # github.com/tedsuo/rata v1.0.1-0.20170830210128-07d200713958
 github.com/tedsuo/rata
 # github.com/thoas/go-funk v0.9.1
 ## explicit
 github.com/thoas/go-funk
-# golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
+# golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 golang.org/x/crypto/ssh/terminal
 # golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 ## explicit
@@ -175,7 +169,6 @@ google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/cheggaaa/pb.v1 v1.0.28
-## explicit
 gopkg.in/cheggaaa/pb.v1
 # gopkg.in/yaml.v2 v2.4.0
 gopkg.in/yaml.v2
