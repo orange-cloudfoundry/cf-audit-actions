@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	code.cloudfoundry.org/cli v0.0.0-20210824215059-5ffa262bb2e5
-	github.com/cloudfoundry-community/go-cf-clients-helper/v2 v2.0.2
+	github.com/cloudfoundry-community/go-cf-clients-helper/v2 v2.0.3
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/mattn/go-colorable v0.1.12
