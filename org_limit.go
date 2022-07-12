@@ -84,24 +84,28 @@ func (c *OrgLimit) Execute(_ []string) error {
 	}
 
 	errors := WaitParallel()
+	var lastError error
 	if len(errors) > 0 {
 		fmt.Println("There is error when deleting apps:")
 		for _, err := range errors {
 			fmt.Printf("\t- %s\n", err.Error())
+			lastError = err
 		}
 	}
 
 	err = c.cleanupOrphanRoutes(orgs[0].GUID)
 	if err != nil {
 		fmt.Println("Error while cleanup orphan's routes:" + err.Error())
+		lastError = err
 	}
 	err = c.cleanupOrphanServices(orgs[0].GUID)
 	if err != nil {
 		fmt.Println("Error while cleanup orphan's service instance:" + err.Error())
+		lastError = err
 	}
 
 	fmt.Println("Modifications has been applied.")
-	return nil
+	return lastError
 }
 
 func cleanupAppRoutes(appGUID string) error {
@@ -109,7 +113,7 @@ func cleanupAppRoutes(appGUID string) error {
 	if err != nil {
 		return err
 	}
-	routeMappings, _, _, err := sess.V3().GetRouteBindings(large, ccv3.Query{
+	routeMappings, _, err := sess.V3().GetRoutes(large, ccv3.Query{
 		Key:    ccv3.AppGUIDFilter,
 		Values: []string{appGUID},
 	})
@@ -118,7 +122,7 @@ func cleanupAppRoutes(appGUID string) error {
 	}
 
 	for _, routeMapping := range routeMappings {
-		_, _, err := sess.V3().DeleteRouteBinding(routeMapping.GUID)
+		_, _, err := sess.V3().DeleteRoute(routeMapping.GUID)
 		if err != nil {
 			return err
 		}
