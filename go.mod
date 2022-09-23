@@ -9,7 +9,7 @@ exclude (
 
 require (
 	code.cloudfoundry.org/cli v0.0.0-20220602204915-eda2b7b2321c
-	github.com/cloudfoundry-community/go-cf-clients-helper/v2 v2.1.0
+	github.com/cloudfoundry-community/go-cf-clients-helper/v2 v2.2.0
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/mattn/go-colorable v0.1.13
@@ -53,7 +53,6 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
