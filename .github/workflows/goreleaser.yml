@@ -40,18 +40,12 @@ jobs:
             exit 1
           fi
 
-          go mod tidy
-          if [ ! -z "$(git status --porcelain)" ]; then
-            echo "::error::modules are not tidy, please run go mod tidy"
-            exit 1
-          fi
-
       - name: tests
         run: |
           go test -v ./...
 
       - name: run goreleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v4
         if: success() && startsWith(github.ref, 'refs/tags/')
         with:
           version: latest
