@@ -1,6 +1,6 @@
 module github.com/orange-cloudfoundry/cf-audit-actions
 
-go 1.19
+go 1.20
 
 exclude (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
@@ -70,7 +70,7 @@ require (
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/oauth2 v0.6.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect
-	golang.org/x/term v0.6.0 // indirect
+	golang.org/x/term v0.7.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
