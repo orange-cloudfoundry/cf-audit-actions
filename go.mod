@@ -17,7 +17,7 @@ require (
 	github.com/orcaman/concurrent-map v1.0.0
 	github.com/prometheus/common v0.43.0
 	github.com/thoas/go-funk v0.9.3
-	golang.org/x/sync v0.1.0
+	golang.org/x/sync v0.2.0
 )
 
 require (
