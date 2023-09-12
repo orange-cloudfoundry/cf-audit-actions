@@ -9,7 +9,7 @@ import (
 
 var sem *semaphore.Weighted
 var waitgroup sync.WaitGroup
-var parrallelError = make(chan error, 1000)
+var parallelError = make(chan error, 1000)
 
 func initParallel() {
 	parallel := options.Parallel
@@ -25,13 +25,13 @@ func RunParallel(meta interface{}, f func(meta interface{}) error) {
 		defer waitgroup.Done()
 		err := sem.Acquire(context.TODO(), 1)
 		if err != nil {
-			parrallelError <- err
+			parallelError <- err
 			return
 		}
 		defer sem.Release(1)
 		err = f(meta)
 		if err != nil {
-			parrallelError <- err
+			parallelError <- err
 		}
 	}(meta)
 }
@@ -42,7 +42,7 @@ func WaitParallel() []error {
 
 	for {
 		select {
-		case err := <-parrallelError:
+		case err := <-parallelError:
 			errors = append(errors, err)
 		default:
 			return errors

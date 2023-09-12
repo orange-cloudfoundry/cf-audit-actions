@@ -172,7 +172,7 @@ func (c *OrgLimit) cleanupOrphanRoutes(orgGUID string) error {
 		createdAt, _ := time.Parse(time.RFC3339, route.CreatedAt)
 		if createdAt.Add(time.Duration(c.TimeLimit)).Before(time.Now()) {
 			RunParallel(route.GUID, func(meta interface{}) error {
-				dests, _, err := sess.V3().GetRouteDestinations((meta.(string)))
+				dests, _, err := sess.V3().GetRouteDestinations(meta.(string))
 				if err != nil {
 					return err
 				}

@@ -62,7 +62,7 @@ func (c *ValidateSSHApp) Execute(_ []string) error {
 		}
 		sshAppMeta := SSHAppMeta{
 			app:           app,
-			session:        sess,
+			session:       sess,
 			deactivateMap: deactivateMap,
 			limit:         time.Duration(c.SshLimit),
 		}
@@ -110,7 +110,6 @@ func (c *ValidateSSHApp) Execute(_ []string) error {
 	return nil
 }
 
-
 func findSshAppDeactivate(meta interface{}) error {
 	sshSpaceMeta := meta.(SSHAppMeta)
 	app := sshSpaceMeta.app
@@ -120,12 +119,12 @@ func findSshAppDeactivate(meta interface{}) error {
 	events, _, err := sess.V3().GetEvents(
 		orderByTimestampDesc,
 		ccv3.Query{
-			Key: "types",
-			Values: []string{ "audit.app.ssh-authorized" },
+			Key:    "types",
+			Values: []string{"audit.app.ssh-authorized"},
 		},
 		ccv3.Query{
-			Key: ccv3.TargetGUIDFilter,
-			Values: []string{ app.GUID },
+			Key:    ccv3.TargetGUIDFilter,
+			Values: []string{app.GUID},
 		},
 	)
 	if err != nil {

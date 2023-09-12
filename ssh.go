@@ -121,16 +121,15 @@ func findSshSpaceDeactivate(meta interface{}) error {
 	sess := sshSpaceMeta.session
 	deactivateMap := sshSpaceMeta.deactivateMap
 
-
 	events, _, err := sess.V3().GetEvents(
 		orderByTimestampDesc,
 		ccv3.Query{
-			Key: "types",
-			Values: []string{ "audit.app.ssh-authorized" },
+			Key:    "types",
+			Values: []string{"audit.app.ssh-authorized"},
 		},
 		ccv3.Query{
-			Key: ccv3.SpaceGUIDFilter,
-			Values: []string{ space.GUID },
+			Key:    ccv3.SpaceGUIDFilter,
+			Values: []string{space.GUID},
 		},
 	)
 
