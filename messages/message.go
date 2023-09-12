@@ -92,6 +92,6 @@ func Warningf(format string, a ...interface{}) {
 	if stopShow {
 		return
 	}
-	Printf("%s: ", C.Brown("Warning"))
+	Printf("%s: ", C.Yellow("Warning"))
 	Printfln(format, a...)
 }

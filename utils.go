@@ -33,7 +33,7 @@ func findSpace(idOrPair string) ([]string, error) {
 		return []string{idOrPair}, err
 	}
 	orgs, _, err := sess.V3().GetOrganizations(ccv3.Query{
-		Key: ccv3.NameFilter,
+		Key:    ccv3.NameFilter,
 		Values: []string{pairSplit[0]},
 	})
 	if err != nil {
@@ -45,8 +45,8 @@ func findSpace(idOrPair string) ([]string, error) {
 
 	if pairSplit[1] != "*" {
 		spaces, _, _, err := sess.V3().GetSpaces(
-			ccv3.Query{ Key: ccv3.OrganizationGUIDFilter, Values: []string{orgs[0].GUID} },
-			ccv3.Query{ Key: ccv3.NameFilter, Values: []string{pairSplit[1]} },
+			ccv3.Query{Key: ccv3.OrganizationGUIDFilter, Values: []string{orgs[0].GUID}},
+			ccv3.Query{Key: ccv3.NameFilter, Values: []string{pairSplit[1]}},
 		)
 		if err != nil {
 			return []string{idOrPair}, err
@@ -57,7 +57,7 @@ func findSpace(idOrPair string) ([]string, error) {
 		return []string{spaces[0].GUID}, nil
 	}
 	spaces, _, _, err := sess.V3().GetSpaces(large, ccv3.Query{
-		Key: ccv3.OrganizationGUIDFilter,
+		Key:    ccv3.OrganizationGUIDFilter,
 		Values: []string{orgs[0].GUID},
 	})
 	if err != nil {

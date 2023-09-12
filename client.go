@@ -15,7 +15,6 @@ var large = ccv3.Query{
 	Values: []string{"5000"},
 }
 
-
 var orderByTimestampDesc = ccv3.Query{
 	Key:    ccv3.OrderBy,
 	Values: []string{"-created_at"},
@@ -50,12 +49,10 @@ type Application struct {
 	UpdatedAt string                    `json:"updated_at,omitempty"`
 }
 
-
 type Route struct {
 	GUID      string `json:"guid,omitempty"`
 	CreatedAt string `json:"created_at,omitempty"`
 }
-
 
 type ServiceInstance struct {
 	GUID      string `json:"guid,omitempty"`
@@ -89,7 +86,6 @@ func (d *Session) ExtGetRoutes(query ...ccv3.Query) ([]Route, error) {
 	})
 	return res, err
 }
-
 
 func (d *Session) ExtGetServiceInstances(query ...ccv3.Query) ([]ServiceInstance, error) {
 	res := []ServiceInstance{}
