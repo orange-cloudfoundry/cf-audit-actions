@@ -13,7 +13,7 @@ require (
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/mattn/go-colorable v0.1.13
-	github.com/mattn/go-isatty v0.0.19
+	github.com/mattn/go-isatty v0.0.20
 	github.com/orcaman/concurrent-map v1.0.0
 	github.com/prometheus/common v0.44.0
 	github.com/thoas/go-funk v0.9.3
