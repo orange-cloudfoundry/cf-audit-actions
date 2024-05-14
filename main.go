@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"github.com/orange-cloudfoundry/cf-audit-actions/messages"
@@ -29,10 +30,10 @@ func Parse(args []string) error {
 	}
 	_, err := parser.ParseArgs(args[1:])
 	if err != nil {
-		if errFlag, ok := err.(*flags.Error); ok && errFlag.Type == flags.ErrCommandRequired {
+		if errFlag, ok := err.(*flags.Error); ok && errors.Is(errFlag.Type, flags.ErrCommandRequired) {
 			return nil
 		}
-		if errFlag, ok := err.(*flags.Error); ok && errFlag.Type == flags.ErrHelp {
+		if errFlag, ok := err.(*flags.Error); ok && errors.Is(errFlag.Type, flags.ErrHelp) {
 			messages.Println(err.Error())
 			return nil
 		}
