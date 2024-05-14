@@ -48,5 +48,4 @@ func WaitParallel() []error {
 			return errors
 		}
 	}
-	return errors
 }
