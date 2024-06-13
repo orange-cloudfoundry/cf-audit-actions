@@ -9,7 +9,7 @@ exclude (
 
 require (
 	code.cloudfoundry.org/cli v0.0.0-20240524142151-a2a685b5ea6e
-	github.com/cloudfoundry-community/go-cf-clients-helper/v2 v2.6.1
+	github.com/cloudfoundry-community/go-cf-clients-helper/v2 v2.6.2
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/mattn/go-colorable v0.1.13
