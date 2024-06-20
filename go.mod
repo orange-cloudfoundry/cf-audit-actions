@@ -8,8 +8,8 @@ exclude (
 )
 
 require (
-	code.cloudfoundry.org/cli v0.0.0-20240524142151-a2a685b5ea6e
-	github.com/cloudfoundry-community/go-cf-clients-helper/v2 v2.6.2
+	code.cloudfoundry.org/cli v0.0.0-20240609151540-b78406a9b0ce
+	github.com/cloudfoundry-community/go-cf-clients-helper/v2 v2.6.3
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/mattn/go-colorable v0.1.13
@@ -62,7 +62,7 @@ require (
 	golang.org/x/oauth2 v0.20.0 // indirect
 	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/term v0.20.0 // indirect
-	golang.org/x/text v0.15.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240521202816-d264139d666e // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240521202816-d264139d666e // indirect
