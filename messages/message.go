@@ -2,11 +2,12 @@ package messages
 
 import (
 	"fmt"
+	"io"
+	"os"
+
 	"github.com/logrusorgru/aurora"
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
-	"io"
-	"os"
 )
 
 var stdout = colorable.NewColorableStdout()
@@ -59,25 +60,43 @@ func Error(str string) {
 	if stopShow {
 		return
 	}
-	Printfln("%s: %s", C.Red("Error"), str)
+	_, err := Printfln("%s: %s", C.Red("Error"), str)
+	if err != nil {
+		fmt.Println("Error printing error message:", err)
+	}
 }
 
 func Errorf(format string, a ...interface{}) {
 	if stopShow {
 		return
 	}
-	Printf("%s: ", C.Red("Error"))
-	Printfln(format, a...)
+	_, err := Printf("%s: ", C.Red("Error"))
+	if err != nil {
+		fmt.Println("Error printing error:", err)
+	}
+	_, err = Printfln(format, a...)
+	if err != nil {
+		fmt.Println("Error printing error format:", err)
+	}
 }
 
 func Fatal(str string) {
-	Printfln("%s: %s", C.Red("Error"), str)
+	_, err := Printfln("%s: %s", C.Red("Error"), str)
+	if err != nil {
+		fmt.Println("Error printing fatal error message:", err)
+	}
 	os.Exit(1)
 }
 
 func Fatalf(format string, a ...interface{}) {
-	Printf("%s: ", C.Red("Error"))
-	Printfln(format, a...)
+	_, err := Printf("%s: ", C.Red("Error"))
+	if err != nil {
+		fmt.Println("Error printing error:", err)
+	}
+	_, err = Printfln(format, a...)
+	if err != nil {
+		fmt.Println("Error printing fatal error format:", err)
+	}
 	os.Exit(1)
 }
 
@@ -85,13 +104,22 @@ func Warning(str string) {
 	if stopShow {
 		return
 	}
-	Printfln("%s: %s", C.Magenta("Warning"), str)
+	_, err := Printfln("%s: %s", C.Magenta("Warning"), str)
+	if err != nil {
+		fmt.Println("Error printing warning message:", err)
+	}
 }
 
 func Warningf(format string, a ...interface{}) {
 	if stopShow {
 		return
 	}
-	Printf("%s: ", C.Yellow("Warning"))
-	Printfln(format, a...)
+	_, err := Printf("%s: ", C.Yellow("Warning"))
+	if err != nil {
+		fmt.Println("Error printing warning:", err)
+	}
+	_, err = Printfln(format, a...)
+	if err != nil {
+		fmt.Println("Error printing warning format:", err)
+	}
 }

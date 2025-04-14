@@ -3,10 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
+
 	"github.com/jessevdk/go-flags"
 	"github.com/orange-cloudfoundry/cf-audit-actions/messages"
 	"github.com/prometheus/common/version"
-	"os"
 )
 
 type Options struct {
@@ -34,7 +35,10 @@ func Parse(args []string) error {
 			return nil
 		}
 		if errFlag, ok := err.(*flags.Error); ok && errors.Is(errFlag.Type, flags.ErrHelp) {
-			messages.Println(err.Error())
+			_, err := messages.Println(err.Error())
+			if err != nil {
+				return fmt.Errorf("error printing error message: %w", err)
+			}
 			return nil
 		}
 		return err
@@ -44,8 +48,7 @@ func Parse(args []string) error {
 }
 
 func main() {
-	var err error
-	err = Parse(os.Args)
+	err := Parse(os.Args)
 	if err != nil {
 		messages.Fatal(err.Error())
 	}

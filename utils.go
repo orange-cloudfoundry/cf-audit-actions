@@ -13,10 +13,11 @@ func findSpaces(idOrPairs []string) ([]string, error) {
 	for _, idOrPair := range idOrPairs {
 		id, err := findSpace(idOrPair)
 		if err != nil {
-			return []string{}, fmt.Errorf(messages.C.Sprintf(
-				"Error found when finding space '%s'",
+			errorMessage := messages.C.Sprintf(
+				"error found when finding space '%s'",
 				messages.C.Cyan(idOrPair),
-			))
+			)
+			return []string{}, fmt.Errorf("%s", errorMessage)
 		}
 		ids = append(ids, id...)
 	}
