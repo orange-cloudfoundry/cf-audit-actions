@@ -18,7 +18,7 @@ require (
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
 	github.com/orcaman/concurrent-map v1.0.0
-	github.com/prometheus/common v0.67.2
+	github.com/prometheus/common v0.67.3
 	github.com/thoas/go-funk v0.9.3
 	golang.org/x/sync v0.18.0
 )
