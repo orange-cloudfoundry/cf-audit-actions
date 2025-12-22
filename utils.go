@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
+	"code.cloudfoundry.org/cli/v8/api/cloudcontroller/ccv3"
 	"github.com/orange-cloudfoundry/cf-audit-actions/messages"
 )
 

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
-	"code.cloudfoundry.org/cli/resources"
+	"code.cloudfoundry.org/cli/v8/api/cloudcontroller/ccv3"
+	"code.cloudfoundry.org/cli/v8/resources"
 	"github.com/orange-cloudfoundry/cf-audit-actions/messages"
 	"github.com/orcaman/concurrent-map"
 	"github.com/thoas/go-funk"
