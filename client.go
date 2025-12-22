@@ -1,8 +1,8 @@
 package main
 
 import (
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/constant"
+	"code.cloudfoundry.org/cli/v8/api/cloudcontroller/ccv3"
+	"code.cloudfoundry.org/cli/v8/api/cloudcontroller/ccv3/constant"
 	clients "github.com/cloudfoundry-community/go-cf-clients-helper/v2"
 )
 
