@@ -175,7 +175,7 @@ github.com/munnerz/goautoneg
 # github.com/orcaman/concurrent-map v1.0.0
 ## explicit
 github.com/orcaman/concurrent-map
-# github.com/prometheus/common v0.67.4
+# github.com/prometheus/common v0.67.5
 ## explicit; go 1.24.0
 github.com/prometheus/common/version
 # github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94
