@@ -1,6 +1,6 @@
 module github.com/orange-cloudfoundry/cf-audit-actions
 
-go 1.25.5
+go 1.25.7
 
 exclude (
 	github.com/imdario/mergo v1.0.0
@@ -11,7 +11,7 @@ exclude (
 )
 
 require (
-	code.cloudfoundry.org/cli/v8 v8.17.0
+	code.cloudfoundry.org/cli/v8 v8.17.1
 	github.com/cloudfoundry-community/go-cf-clients-helper/v2 v2.13.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/logrusorgru/aurora v2.0.3+incompatible
@@ -24,8 +24,8 @@ require (
 )
 
 require (
-	code.cloudfoundry.org/bytefmt v0.59.0 // indirect
-	code.cloudfoundry.org/clock v1.56.0 // indirect
+	code.cloudfoundry.org/bytefmt v0.60.0 // indirect
+	code.cloudfoundry.org/clock v1.57.0 // indirect
 	code.cloudfoundry.org/go-log-cache/v2 v2.0.7 // indirect
 	code.cloudfoundry.org/go-loggregator/v9 v9.2.1 // indirect
 	code.cloudfoundry.org/jsonry v1.1.4 // indirect
@@ -65,9 +65,9 @@ require (
 	golang.org/x/crypto v0.46.0 // indirect
 	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/oauth2 v0.34.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
-	golang.org/x/term v0.38.0 // indirect
-	golang.org/x/text v0.32.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/term v0.39.0 // indirect
+	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20251213004720-97cd9d5aeac2 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251213004720-97cd9d5aeac2 // indirect
