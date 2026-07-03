@@ -1,6 +1,6 @@
 module github.com/orange-cloudfoundry/cf-audit-actions
 
-go 1.26.2
+go 1.26.4
 
 exclude (
 	github.com/imdario/mergo v1.0.0
@@ -11,7 +11,7 @@ exclude (
 )
 
 require (
-	code.cloudfoundry.org/cli/v8 v8.18.3
+	code.cloudfoundry.org/cli/v8 v8.18.4
 	github.com/cloudfoundry-community/go-cf-clients-helper/v2 v2.14.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/logrusorgru/aurora v2.0.3+incompatible
