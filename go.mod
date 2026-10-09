@@ -20,7 +20,7 @@ require (
 	github.com/orcaman/concurrent-map v1.0.0
 	github.com/prometheus/common v0.72.0
 	github.com/thoas/go-funk v0.9.3
-	golang.org/x/sync v0.23.0
+	golang.org/x/sync v0.24.0
 )
 
 require (
