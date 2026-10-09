@@ -15,7 +15,7 @@ require (
 	github.com/cloudfoundry-community/go-cf-clients-helper/v2 v2.14.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/logrusorgru/aurora v2.0.3+incompatible
-	github.com/mattn/go-colorable v0.1.15
+	github.com/mattn/go-colorable v0.1.16
 	github.com/mattn/go-isatty v0.0.24
 	github.com/orcaman/concurrent-map v1.0.0
 	github.com/prometheus/common v0.72.0
